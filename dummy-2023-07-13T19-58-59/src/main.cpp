@@ -101,8 +101,8 @@ void sr(int speed) {
 void arc(int dist, int diff) {
   lr.resetPosition();
   rr.resetPosition();
-  Inertial4.setRotation(0,degrees);
-  while(fabs((lr.position(degrees)+rr.position(degrees))/2-dist)>50||fabs(Inertial4.rotation(degrees)+diff)>8) {
+  
+  while(fabs((lr.position(degrees)+rr.position(degrees))/2-dist)>50||fabs(Inertial4.rotation(degrees)+diff)>4) {
   sl(pid(dist,lr.position(degrees),1)-pid(diff,Inertial4.rotation(degrees),2));
   sr(pid(dist,rr.position(degrees),1)+pid(diff,Inertial4.rotation(degrees),2));
   wait(10,msec);
@@ -130,14 +130,40 @@ void swingl(float tim) {
   sl(0);
 }
 
+void swingr(float tim) {
+  sr(60);
+  sl(-30);
+  wait(tim,sec);
+  sl(0);
+  sr(0);
+}
+
+void df(float tim) {
+  sl(60);
+  sr(60);
+  wait(tim,sec);
+  sl(0);
+  sr(0);
+}
+void db(float tim) {
+  sl(-60);
+  sr(-60);
+  wait(tim,sec);
+  sl(0);
+  sr(0);
+}
+
 int main() {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
   thread t(thr);
   Inertial4.calibrate();
   wait(4,sec);
-  arc(1800,20);
-  wait(.1,sec);
-  arc(-200,-120);
-  swingl(.4);
+  arc(2000,17);
+  db(.13);
+  swingl(.48);
+  wait(.3,sec);
+  df(.4);
+  swingl(.35);
+  arc(2000,20);
 }
