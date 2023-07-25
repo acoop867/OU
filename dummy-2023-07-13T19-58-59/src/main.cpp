@@ -10,16 +10,17 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// l1                   motor         7               
-// l2                   motor         5               
+// l1                   motor         10              
+// l2                   motor         16              
 // l3                   motor         3               
-// r1                   motor         10              
-// r2                   motor         9               
-// r3                   motor         8               
+// r1                   motor         13              
+// r2                   motor         18              
+// r3                   motor         6               
 // Inertial4            inertial      4               
 // lr                   rotation      11              
 // rr                   rotation      20              
 // Controller1          controller                    
+// Intake               motor         1               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -68,7 +69,7 @@ int pid(int dist,int sense,int s) {
      max=50;
   }
   else{
-     kp=.25;
+     kp=.35;
      ki=0;
      kd=0;
      max=60;
@@ -130,10 +131,20 @@ void swingl(float tim) {
   sl(0);
 }
 
-void swingr(float tim) {
-  sr(60);
-  sl(-30);
+void swingrb(float tim) {
+  
+  sl(-60);
+  sr(-10);
   wait(tim,sec);
+  sl(0);
+  sr(0);
+}
+
+void turnm(int deg) {
+  while(fabs(deg-Inertial4.rotation())>3&&!testr()&&!testl()) {
+  sl(pid(deg,Inertial4.rotation(degrees),2));
+  sr(-pid(deg,Inertial4.rotation(degrees),2));
+  }
   sl(0);
   sr(0);
 }
@@ -159,11 +170,23 @@ int main() {
   thread t(thr);
   Inertial4.calibrate();
   wait(4,sec);
-  arc(2000,17);
-  db(.13);
-  swingl(.48);
-  wait(.3,sec);
+  
+
+  df(.5);
+  turnm(-10);
+  db(.4);
+  turnm(40);
+  df(.8);
+  db(.3);
+  turnm(95);
+  df(.5);
+  db(.2);
+  turnm(240);
+  df(1);
+  db(.2);
+  turnm(150);
   df(.4);
-  swingl(.35);
-  arc(2000,20);
+  turnm(100);
+  df(.5);
+  db(.01);
 }
