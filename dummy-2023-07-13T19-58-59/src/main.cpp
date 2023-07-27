@@ -10,17 +10,19 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// l1                   motor         10              
-// l2                   motor         16              
-// l3                   motor         3               
-// r1                   motor         13              
-// r2                   motor         18              
-// r3                   motor         6               
-// Inertial4            inertial      4               
+// l1                   motor         5               
+// l2                   motor         20              
+// l3                   motor         17              
+// r1                   motor         4               
+// r2                   motor         12              
+// r3                   motor         14              
+// Inertial4            inertial      18              
 // lr                   rotation      11              
-// rr                   rotation      20              
+// rr                   rotation      21              
 // Controller1          controller                    
-// Intake               motor         1               
+// Intake               motor         3               
+// cata                 motor         8               
+// LimitSwitchA         limit         A               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -164,9 +166,7 @@ void db(float tim) {
   sr(0);
 }
 
-int main() {
-  // Initializing Robot Configuration. DO NOT REMOVE!
-  vexcodeInit();
+void auton() {
   thread t(thr);
   Inertial4.calibrate();
   wait(4,sec);
@@ -189,4 +189,51 @@ int main() {
   turnm(100);
   df(.5);
   db(.01);
+}
+
+void cataspin() {
+  if(LimitSwitchA.pressing()) {
+    cata.spin(forward,80,pct);
+    
+    Controller1.rumble(rumbleShort);
+    while(LimitSwitchA.pressing()) {
+      wait(10,msec);
+    }
+  }
+  cata.stop(hold);
+  while (! LimitSwitchA.pressing()) {
+    cata.spin(forward,80,pct);
+  }
+  cata.stop(hold);
+}
+
+
+int main() {
+  // Initializing Robot Configuration. DO NOT REMOVE!
+  vexcodeInit();
+  
+
+
+  while (true) {
+
+    sl(Controller1.Axis3.position()+Controller1.Axis1.position()/1.5);
+    sr(Controller1.Axis3.position()-Controller1.Axis1.position()/1.5);
+
+    if(Controller1.ButtonR2.pressing()) {
+      thread t(cataspin);
+    }
+
+
+    Intake.stop();
+    if (Controller1.ButtonR1.pressing()) {
+      Intake.spin(forward,100,pct);
+    }
+    if (Controller1.ButtonL1.pressing()) {
+      Intake.spin(reverse,100,pct);
+    }
+
+
+    wait(10,msec);
+  }
+
 }

@@ -14,6 +14,8 @@ extern rotation lr;
 extern rotation rr;
 extern controller Controller1;
 extern motor Intake;
+extern motor cata;
+extern limit LimitSwitchA;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
