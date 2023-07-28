@@ -21,6 +21,7 @@ controller Controller1 = controller(primary);
 motor Intake = motor(PORT3, ratio18_1, false);
 motor cata = motor(PORT8, ratio18_1, false);
 limit LimitSwitchA = limit(Brain.ThreeWirePort.A);
+motor Arm = motor(PORT19, ratio18_1, true);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable

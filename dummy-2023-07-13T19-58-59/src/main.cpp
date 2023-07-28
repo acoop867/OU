@@ -23,6 +23,7 @@
 // Intake               motor         3               
 // cata                 motor         8               
 // LimitSwitchA         limit         A               
+// Arm                  motor         19              
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -211,29 +212,70 @@ void cataspin() {
 int main() {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-  
+  bool ArmButtonP= true;//if both buttons are pressed for toggle
+  int ArmState=0;// state of arm
+  int ArmAngle = 1;
 
 
   while (true) {
+    
+
 
     sl(Controller1.Axis3.position()+Controller1.Axis1.position()/1.5);
     sr(Controller1.Axis3.position()-Controller1.Axis1.position()/1.5);
 
-    if(Controller1.ButtonR2.pressing()) {
+    if(Controller1.ButtonL2.pressing()) {
       thread t(cataspin);
     }
 
 
-    Intake.stop();
+    
     if (Controller1.ButtonR1.pressing()) {
-      Intake.spin(forward,100,pct);
-    }
-    if (Controller1.ButtonL1.pressing()) {
       Intake.spin(reverse,100,pct);
+    }else if (Controller1.ButtonL1.pressing()) {
+      Intake.spin(forward,100,pct);
+    }else{
+      Intake.stop();
+    }
+    if (Controller1.ButtonR1.pressing() and Controller1.ButtonL1.pressing() and ArmButtonP){
+      if (ArmState !=1){
+        ArmState = 1;
+        ArmAngle = -130;
+      }else{
+        ArmState = 2;
+        ArmAngle = 590;
+      }
+      ArmButtonP= false;
+    }else if(!Controller1.ButtonR1.pressing() or !Controller1.ButtonL1.pressing()){
+      ArmButtonP= true;
+    }
+    if (Controller1.ButtonB.pressing()){
+      Arm.setPosition(-135,deg);
+      ArmAngle = -130;
+    }
+    if (Controller1.ButtonY.pressing()){
+      Arm.setPosition(595,deg);
+    }
+    
+    if(Arm.position(deg) < ArmAngle-5 or Arm.position(deg) > ArmAngle+5){
+      int speed;
+      if (fabs(ArmAngle - Arm.position(deg)) < 100){
+        speed = 20;
+      }else{
+        speed = 100;
+      }
+      if(ArmAngle - Arm.position(deg) > 0){
+        Arm.spin(fwd,speed,pct);
+      }else{
+        Arm.spin(reverse,speed,pct);
+      }
+      
+    }else{
+      Arm.stop(hold);
     }
 
 
-    wait(10,msec);
+    //wait(10,msec);
   }
 
 }
