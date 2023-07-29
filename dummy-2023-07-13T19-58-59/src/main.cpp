@@ -13,14 +13,14 @@
 // l1                   motor         5               
 // l2                   motor         20              
 // l3                   motor         17              
-// r1                   motor         4               
+// r1                   motor         3               
 // r2                   motor         12              
 // r3                   motor         14              
 // Inertial4            inertial      18              
 // lr                   rotation      11              
 // rr                   rotation      21              
 // Controller1          controller                    
-// Intake               motor         3               
+// Intake               motor         4               
 // cata                 motor         8               
 // LimitSwitchA         limit         A               
 // Arm                  motor         19              
@@ -193,19 +193,24 @@ void auton() {
 }
 
 void cataspin() {
-  if(LimitSwitchA.pressing()) {
-    cata.spin(forward,80,pct);
-    
-    Controller1.rumble(rumbleShort);
-    while(LimitSwitchA.pressing()) {
-      wait(10,msec);
+  while(true){
+    if(LimitSwitchA.pressing() and !Controller1.ButtonL2.pressing()){
+      cata.stop(hold);
+    }else{
+      cata.spin(fwd,100,pct);
     }
+  wait(1,msec);
   }
-  cata.stop(hold);
-  while (! LimitSwitchA.pressing()) {
-    cata.spin(forward,80,pct);
+}
+
+void armFreeSpin(bool direction){//this does not hold arm so that the motor does not get damedged
+  if (direction == true){
+    Arm.spin(fwd,100,pct);
+  }else{
+    Arm.spin(reverse,100,pct);
   }
-  cata.stop(hold);
+  wait(0.5,seconds);
+  Arm.stop(coast);
 }
 
 
@@ -213,8 +218,8 @@ int main() {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
   bool ArmButtonP= true;//if both buttons are pressed for toggle
-  int ArmState=0;// state of arm
-  int ArmAngle = 1;
+  int ArmState=1;// state of arm
+  
 
 
   while (true) {
@@ -224,11 +229,9 @@ int main() {
     sl(Controller1.Axis3.position()+Controller1.Axis1.position()/1.5);
     sr(Controller1.Axis3.position()-Controller1.Axis1.position()/1.5);
 
-    if(Controller1.ButtonL2.pressing()) {
+    if(Controller1.ButtonDown.pressing()){//turns on the cata auto loop. Fixes the accidental release
       thread t(cataspin);
     }
-
-
     
     if (Controller1.ButtonR1.pressing()) {
       Intake.spin(reverse,100,pct);
@@ -240,38 +243,14 @@ int main() {
     if (Controller1.ButtonR1.pressing() and Controller1.ButtonL1.pressing() and ArmButtonP){
       if (ArmState !=1){
         ArmState = 1;
-        ArmAngle = -130;
+        armFreeSpin(false);
       }else{
         ArmState = 2;
-        ArmAngle = 590;
+        armFreeSpin(true);
       }
       ArmButtonP= false;
     }else if(!Controller1.ButtonR1.pressing() or !Controller1.ButtonL1.pressing()){
       ArmButtonP= true;
-    }
-    if (Controller1.ButtonB.pressing()){
-      Arm.setPosition(-135,deg);
-      ArmAngle = -130;
-    }
-    if (Controller1.ButtonY.pressing()){
-      Arm.setPosition(595,deg);
-    }
-    
-    if(Arm.position(deg) < ArmAngle-5 or Arm.position(deg) > ArmAngle+5){
-      int speed;
-      if (fabs(ArmAngle - Arm.position(deg)) < 100){
-        speed = 20;
-      }else{
-        speed = 100;
-      }
-      if(ArmAngle - Arm.position(deg) > 0){
-        Arm.spin(fwd,speed,pct);
-      }else{
-        Arm.spin(reverse,speed,pct);
-      }
-      
-    }else{
-      Arm.stop(hold);
     }
 
 
