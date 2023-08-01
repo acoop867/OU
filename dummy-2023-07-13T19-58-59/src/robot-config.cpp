@@ -14,14 +14,16 @@ motor l3 = motor(PORT17, ratio6_1, true);
 motor r1 = motor(PORT3, ratio6_1, true);
 motor r2 = motor(PORT12, ratio6_1, false);
 motor r3 = motor(PORT14, ratio6_1, false);
-inertial Inertial4 = inertial(PORT18);
+inertial Inertial4 = inertial(PORT10);
 rotation lr = rotation(PORT11, false);
 rotation rr = rotation(PORT21, true);
 controller Controller1 = controller(primary);
 motor Intake = motor(PORT4, ratio18_1, false);
 motor cata = motor(PORT8, ratio18_1, false);
 limit LimitSwitchA = limit(Brain.ThreeWirePort.A);
-motor Arm = motor(PORT19, ratio18_1, true);
+motor arm = motor(PORT19, ratio18_1, true);
+digital_out wingR = digital_out(Brain.ThreeWirePort.G);
+digital_out wingL = digital_out(Brain.ThreeWirePort.H);
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
