@@ -72,7 +72,7 @@ int pid(int dist,int sense,int s) {
      max=50;
   }
   else{
-     kp=.4;
+     kp=.5;
      ki=0;
      kd=.05;
      max=60;
@@ -168,6 +168,13 @@ void df(float tim) {
   sl(0);
   sr(0);
 }
+void db(float tim,bool sp) {int spp = -60; if(sp) {spp=-30;}
+  sl(spp);
+  sr(spp);
+  wait(tim,sec);
+  sl(0);
+  sr(0);
+}
 void db(float tim) {
   sl(-60);
   sr(-60);
@@ -189,27 +196,60 @@ void intake(bool s,bool dir) {
 }
 
 void cat() {
-  if(!LimitSwitchA.pressing()){
-      cata.spin(fwd,100,pct);
-      while(!LimitSwitchA.pressing()) {
-        wait(1,msec);
-      }
-      cata.stop();
-  }
+  cata.spin(forward,100,pct);
+  wait(.6,seconds);
+  cata.stop(hold);
 }
+bool n=true;
 void cataspin() {
   while(true){
+    while(n) {
     if(LimitSwitchA.pressing() and !Controller1.ButtonL2.pressing()){
       cata.stop(hold);
     }else{
       cata.spin(fwd,100,pct);
     }
+    wait(1,msec);
+    }
   wait(1,msec);
   }
 }
 
+bool f=true;
+
+void cataspinauto(){
+  if(LimitSwitchA.pressing()){
+    f=false;
+  }
+  if(!LimitSwitchA.pressing()){
+    f=true;
+  }
+  if(f){
+    while(!LimitSwitchA.pressing()){
+    cata.spin(fwd, 100, pct);
+  }
+  }
+  if(!f){
+    cata.spin(fwd, 100, percent);
+    wait(0.2, seconds);
+    while(!LimitSwitchA.pressing()){
+      cata.spin(fwd, 100, pct);
+    }
+  }
+  
+  cata.stop(hold);
+}
+
+void wingss(){
+    wait(.6, seconds);
+
+    wingL.set(1);
+    wingR.set(1);
+  
+}
+
+
 void armFreeSpin(bool direction){//this does not hold arm so that the motor does not get damedged
-  arm.setBrake(coast);
   if (direction == true){
     arm.spin(fwd,100,pct);
   }else{
@@ -226,7 +266,20 @@ void armtime(bool direction,float time){//this does not hold arm so that the mot
     arm.spin(reverse,100,pct);
   }
   wait(time,seconds);
-  arm.stop(hold);
+  arm.stop(coast);
+}
+
+void dfl() {
+  sl(-40);
+  sr(-40);
+  wait(.7,seconds);
+  int x=0;
+  while(lines.reflectivity()<18&&x<50) {
+    wait(10,msec);
+    x++;
+  }
+  sl(0);
+  sr(0);
 }
 
 competition Comp;
@@ -235,10 +288,21 @@ competition Comp;
 int choice=0;
 void auton() {
   
+  if(choice == 4) { //test
+    turnPID(90,100,-1);
+  intake(true,false);
+  wait(.5,sec);
+  turnPID(-45,100,-1);
+  intake(false, true);
+  wait(.5,sec);
+  turnPID(135, 100, -1);
   
-  
+  intake(true,true);
+
+  wait(1,sec);
+  }
   if(choice == 0) { //defense
-    df(.5);
+    /*df(.5);
     turnm(-10);
     db(.4);
     turnm(40);
@@ -254,76 +318,145 @@ void auton() {
     df(.4);
     turnm(100);
     df(.5);
-    db(.01);
+    db(.01);*/
+    thread t (cataspinauto);
+    db(0.7);
+    turnPID(-45, 100, 400);
+    forwardPID(13, 100, -1);
+    turnPID(45, 100, 400);
+    forwardPID(10, 100, -1);
+    turnPID(45, 100, 200);
+    armFreeSpin(true);
+    intake(true, true);
+    db(0.8);
+    wait(1, seconds);
+    cataspinauto();
+    armFreeSpin(false);
+    turnPID(190, 180, -1);
+    forwardPID(10, 100, -1);
+    turnPID(90, 90, -1);
+    wingR.set(1);
+    db(0.5);
+    wingR.set(0);
+    turnPID(45, 100, -1);
+    cataspinauto();
+    forwardPID(12, 100, -1);
+
+    turnPID(-45, 100, -1);
+    armFreeSpin(false);
+    df(0.45);
+    turnPID(-45, 100, -1);
+    armFreeSpin(true);
+
+
   }
   if(choice ==1) { //offense
-    db(.4);
-    cat();
-    cata.setBrake(coast);
-    wait(.2,seconds);
-    cata.setBrake(hold);
-    wait(.2,seconds);
-    df(.27,true);
-    turnm(112);
-    intake(true,true);
-    df(2,true);
-    
-    turnm(0);
-    intake(false,true);
-    db(.61);
-    turnm(90);
-    df(.2);
-    
-
-    
-    wingL.set(1);
-
-    db(.4);
-    
-    armtime(false, .5);
-    db(.7);
-
-    df(.3);
-    turnm(-90);
     intake(true,false);
+    db(.7);
+    
+    
+    wait(.2,seconds);
+    df(.4,true);
+    //turnm(101);
+    turnPID(108, 100, -1);
+
+    intake(true,true);
+    df(1.9,true);
+    wait(.5,seconds);
+    db(.2);
+    turnPID(180, 100, -1);
+    //df(.285);
+    forwardPID(11, 100, -1);
+    intake(false, true);
+    //turnm(-88);
+    turnPID(270, 100, -1);
+    intake(true,false);
+    wait(.6,seconds);
+    df(.27);
+    //turnm(-85);
+    
+    df(.3,true);
+
+    db(.6);
+    turnPID(270, 100, 300);
+    wingL.set(1);
+    df(.35,true);
+    wingL.set(0);
     df(.3);
+
+    db(.6);
+    turnPID(305, 100, 500);
+    
+    forwardPID(46, 100, -1);
+    armFreeSpin(true);
+    db(.5);
+    // turnm(1);
+    // intake(false,true);
+
+    // dfl();
+    // turnm(90);
+    // df(.2);
+    
+
+    
+    // wingL.set(1);
+    // db(.4);
+    // armtime(false, .5);
+    // db(.7);
+    // wingL.set(0);
+
+    // df(.3);
+    // turnm(-90);
+    
+    // intake(true,false);
+    // df(.3);
+    // wait(.4,seconds);
+    // db(.1);
+    // turnm(0);
+    // wingL.set(1);
+    // wait(.2,sec);
+    // wingL.set(0);
+    // df(.4);
   }
   if(choice == 3) { //offense bad
 
-    armFreeSpin(true);
-    arm.setPosition(0, degrees);
-    armtime(false, .22);
-    wait(.2,seconds);
-    db(.05);
-    turnm(-77);
-    df(.15);
     
-    armFreeSpin(true);
-    
-     db(.2);
-     df(.2);
-     armtime(false,.22);
-     wait(.4,seconds);
-
-     turnm(-90);
-     db(.4);
-     turnm(0);
-     df(.52);
-     turnm(-90);
-     intake(true,true);
-     df(.4);
-     intake(false,true);
-     armFreeSpin(true);
-     db(.2);
-     turnm(0);
-     
-     df(.2);
-     wait(.2,seconds);
-
-     turnm(55);
-     armFreeSpin(false);
      intake(true,false);
-     df(.5);
+    db(.7);
+    
+    
+    wait(.2,seconds);
+    df(.4,true);
+    //turnm(101);
+    turnPID(108, 100, -1);
+
+    intake(true,true);
+    df(1.9,true);
+    wait(.5,seconds);
+    db(.2);
+    turnPID(180, 100, -1);
+    //df(.285);
+    forwardPID(11, 100, -1);
+    intake(false, true);
+    //turnm(-88);
+    turnPID(270, 100, -1);
+    intake(true,false);
+    wait(.6,seconds);
+    df(.27);
+    //turnm(-85);
+    
+    df(.3,true);
+
+    db(.6);
+    turnPID(270, 100, 300);
+    wingL.set(1);
+    df(.35,true);
+    wingL.set(0);
+    df(.2);
+
+    turnPID(45, 100, -1);
+    df(.4);
+    armFreeSpin(true);
      
     
     
@@ -333,35 +466,52 @@ void auton() {
     cata.spin(forward, 100, pct);
     wait(35, seconds);
     cata.stop();
-    df(.5);
-    turnm(35);
-    wingR.set(true);
-    wingL.set(true);
+    
+    db(.2);
 
-    df(1);
+    turnPID(-15, 100, -1);
+
+    db(.6);
+    df(.4);
+
+    turnPID(40, 100, -1);
+
+
+
+    
+
+
+    db(2,true);
+    turnPID(90, 100, -1);
+    thread g(wingss);
+    
+    
+    
+    db(2);
+
+    df(.5);
+    db(1);
   }
 
 
 
 }
 
+void tog() {
+  n=!n;
+}
 
 void driver() {
   bool ArmButtonP= true;//if both buttons are pressed for toggle
   int ArmState=1;// state of arm
   int wstate=0;
-
+  thread t(cataspin);
 
   while (true) {
-    
-
-    arm.setBrake(hold);
     sl(Controller1.Axis3.position()+Controller1.Axis1.position()/1.5);
     sr(Controller1.Axis3.position()-Controller1.Axis1.position()/1.5);
 
-    if(Controller1.ButtonDown.pressing()){//turns on the cata auto loop. Fixes the accidental release
-      thread t(cataspin);
-    }
+    Controller1.ButtonDown.pressed(tog);
 
     if(Controller1.ButtonR2.pressing()) {
       while(Controller1.ButtonR2.pressing()) {
@@ -410,7 +560,7 @@ void pre() {
         wait(10,msec);
       }
       choice++;
-      if(choice>2) {
+      if(choice>3) {
         choice =0;
       }
     }
@@ -425,6 +575,9 @@ void pre() {
     }
     if(choice == 2) {
       Brain.Screen.print("Skills");
+    }
+    if(choice == 3) {
+      Brain.Screen.print("Offense touch");
     }
 
 
@@ -444,6 +597,9 @@ int main() {
   
   while(1){
     wait(100,msec);
+    Controller1.Screen.clearScreen();
+    Controller1.Screen.setCursor(2,1);
+    Controller1.Screen.print(Intake.velocity(rpm));
   }
 
 }

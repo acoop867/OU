@@ -19,6 +19,7 @@ extern limit LimitSwitchA;
 extern motor arm;
 extern digital_out wingR;
 extern digital_out wingL;
+extern line lines;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
