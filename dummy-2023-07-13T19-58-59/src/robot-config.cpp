@@ -24,6 +24,7 @@ limit LimitSwitchA = limit(Brain.ThreeWirePort.A);
 motor arm = motor(PORT19, ratio18_1, true);
 digital_out wingR = digital_out(Brain.ThreeWirePort.G);
 digital_out wingL = digital_out(Brain.ThreeWirePort.H);
+digital_out lift = digital_out(Brain.ThreeWirePort.C);
 line lines = line(Brain.ThreeWirePort.E);
 
 // VEXcode generated functions

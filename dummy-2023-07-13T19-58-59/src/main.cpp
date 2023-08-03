@@ -512,6 +512,12 @@ void driver() {
     sr(Controller1.Axis3.position()-Controller1.Axis1.position()/1.5);
 
     Controller1.ButtonDown.pressed(tog);
+    if(Controller1.ButtonA.pressing()){
+      lift.set(true);
+    }
+    if(Controller1.ButtonY.pressing()){
+      lift.set(false);
+    }
 
     if(Controller1.ButtonR2.pressing()) {
       while(Controller1.ButtonR2.pressing()) {

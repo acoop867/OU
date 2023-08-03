@@ -19,6 +19,7 @@ extern limit LimitSwitchA;
 extern motor arm;
 extern digital_out wingR;
 extern digital_out wingL;
+extern digital_out lift;
 extern line lines;
 
 /**
